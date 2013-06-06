@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_card"
+    android:orientation="vertical"
+    android:padding="8dp" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Configure"
+        style="@style/Title" />
+     <TextView
+        android:id="@+id/line"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:gravity="center_horizontal"
+        android:paddingTop="5dip"
+        android:textStyle="bold" />
+
+     <TextView
+         android:id="@+id/headphone_status"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_marginTop="15dp"
+         android:layout_marginLeft="15dp"
+         android:layout_marginBottom="15dp"
+         android:text="@string/headphone_status"
+         style="@style/BigText" 
+         android:textAppearance="?android:attr/textAppearanceMedium" />
+     
+       <TextView
+        android:id="@+id/line1"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_height="4dp"
+        android:gravity="center_horizontal"
+        android:paddingTop="5dip"
+         />
+
+     <TextView
+         android:id="@+id/textView3"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="@string/set_delay"
+         android:layout_marginTop="15dp"
+         android:layout_marginLeft="15dp"
+         android:layout_marginBottom="15dp"
+         style="@style/BigText" 
+         android:textAppearance="?android:attr/textAppearanceMedium" />
+
+     <SeekBar
+         android:id="@+id/seekBar"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content" 
+         android:layout_marginTop="5dp"
+         android:layout_marginLeft="15dp"
+         android:layout_marginBottom="5dp"
+         android:max="500"/>
+
+     <TextView
+         android:id="@+id/current_delay"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center_horizontal"
+         android:layout_marginBottom="15dp"
+         android:text="Small Text"
+         style="@style/BigText" 
+         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+     <TextView
+         android:id="@+id/delay_explain"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_marginLeft="15dp"
+         android:text="@string/delay_explained"
+         android:textAppearance="?android:attr/textAppearanceSmall"
+         style="@style/SmallText" />
+
+</LinearLayout>

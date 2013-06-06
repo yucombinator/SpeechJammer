@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:chartview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:background="@drawable/background_card"
+    android:orientation="vertical" >
+    
+        <com.fima.chartview.ChartView
+        android:id="@+id/chart_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="8dp"
+        chartview:bottomLabelHeight="0dp"
+        chartview:gridLineColor="#E5E5E5"
+        chartview:gridLineWidth="1dp"
+        chartview:gridLinesHorizontal="5"
+        chartview:gridLinesVertical="5"
+        chartview:leftLabelWidth="0dp" />
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignRight="@+id/chart_view"
+            android:layout_marginRight="55dp"
+            android:text="Button"
+            android:onClick="updateChart" />
+</LinearLayout>

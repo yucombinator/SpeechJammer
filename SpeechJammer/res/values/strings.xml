@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SpeechJammer</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="no_headphone_message">No headphone connected! Please plug one in to avoid audio feedback.</string>
+    <string name="toggle_start">Start</string>
+    <string name="toggle_stop">Stop</string>
+    <string name="about">About</string>
+    <string name="headphone_status">Headphone status</string>
+    <string name="headphone_status1">Headphone connected</string>
+    <string name="headphone_status2">Headphone not connected</string>
+    <string name="set_delay">Adjust delay</string>
+    <string name="reset_default">Reset to default</string>
+    <string name="delay_explained">Because of the Android\'s inherent audio latency, the actual audio delay will be higher than configured.</string>
+
+</resources>
