@@ -76,12 +76,13 @@ public class RecordFragment extends Fragment implements AudioBufferManager.Buffe
 		}
     	
     	visualizer.setEnabled(true);
-    	
+
     }
 
-	@Override
-	public void onBufferUpdate(byte[] bytes) {
-		eqView.updateVisualizer(bytes);
-		fftView.updateVisualizer(bytes);
+    @Override
+    public void onBufferUpdate(byte[] samp) {
+
+    	eqView.updateVisualizer(samp);
+		fftView.updateVisualizer(samp);
 	}
 }

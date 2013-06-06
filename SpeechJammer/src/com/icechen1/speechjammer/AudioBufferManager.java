@@ -27,7 +27,7 @@ public class AudioBufferManager extends Thread{
 	AudioRecord arecord;
 	AudioTrack atrack;
 	int SAMPLE_RATE;
-	int buffersize;
+	static int buffersize;
 	private boolean started = true;
 	private static BufferCallBack mCallBack;
 	double delay;
@@ -138,9 +138,27 @@ public class AudioBufferManager extends Thread{
 	}
 	private static Handler uiCallback = new Handler () {
 	    public void handleMessage (Message msg) {
-	    	byte[] b = (byte[]) msg.obj;
-	    	mCallBack.onBufferUpdate(b);
+	    	byte[] bytes = (byte[]) msg.obj;
+	    	byte[] toReturn = new byte[buffersize/2];
+	    	//Convert bytes into samples
+	    	int sampleIndex = 0;
+
+	    	for (int t = 0; t < bytes.length;) {
+	    		int low = (int) bytes[t];
+	    		t++;
+	    		int high = (int) bytes[t];
+	    		t++;
+	    		int sample = getSixteenBitSample(high, low);
+	    		toReturn[sampleIndex] = (byte) sample;
+	    		sampleIndex++;
+	    	}
+	    	
+	    	mCallBack.onBufferUpdate(toReturn);
 	    }
 	};
+	
+	private static int getSixteenBitSample(int high, int low) {
+		return (high << 8) + (low & 0x00ff);
+	}
 	
 }
