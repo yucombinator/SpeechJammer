@@ -13,29 +13,28 @@ import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 public class AudioBufferManager extends Thread{
-	String LOG_TAG = "SpeechJammer";
+	public interface BufferCallBack {
+		public void onBufferUpdate(byte[] b);
+	}
+	static String LOG_TAG = "SpeechJammer";
 	AudioRecord arecord;
 	AudioTrack atrack;
 	int SAMPLE_RATE;
 	int buffersize;
 	private boolean started = true;
+	private static BufferCallBack mCallBack;
 	double delay;
 	
-	public AudioBufferManager(int time) {
-		// TODO Auto-generated constructor stub
+	public AudioBufferManager(int time, BufferCallBack callback) {
+		mCallBack = callback;
 		delay=time;
-	}
-
-    @Override
-    public void run() { 
-           android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-           //AudioRecord recorder = null;
-           
 		// Prepare the AudioRecord & AudioTrack
 		try {
 			//Find the best supported sample rate
@@ -60,19 +59,34 @@ public class AudioBufferManager extends Thread{
 					SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
 					AudioFormat.ENCODING_PCM_16BIT, buffersize * 1,
 					AudioTrack.MODE_STREAM);
-			
-
+			MainActivity.AudioSessionID = atrack.getAudioSessionId();
+			atrack.getAudioSessionId();
 			atrack.setPlaybackRate(SAMPLE_RATE);
 		} catch (Throwable t) {
 			Log.e(LOG_TAG, "Initializing Audio Record and Play objects Failed "+t.getLocalizedMessage());
 		}
+	}
+
+    @Override
+    public void run() { 
+           android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+           //AudioRecord recorder = null;
 
 		//Create our buffers
         byte[] buffer  = new byte[buffersize];
         //A circular buffer
         CircularByteBuffer circBuffer = new CircularByteBuffer(SAMPLE_RATE*10);
         //Add an offset to the circular buffer
-        final int emptySamples = (int)(SAMPLE_RATE * (delay/1000)); //ms to secs
+        int emptySamples = (int)(SAMPLE_RATE * (delay/1000)); //ms to secs
+        
+        if((emptySamples%2)==0){
+        	//Even number for emptySamples, do nothing
+        }else{
+        	//BUG odd emptySamples value produce weird noise, so we add one to it.
+        	emptySamples += 1;
+        }
+		Log.i(LOG_TAG, "Empty Sample: "+emptySamples);
+
         byte[] emptyBuf = new byte[emptySamples];
         Arrays.fill(emptyBuf, (byte)Byte.MIN_VALUE );
         try {
@@ -96,6 +110,9 @@ public class AudioBufferManager extends Thread{
         		circBuffer.getInputStream().read(buffer, 0, buffersize);
         		//Play the byte array content
                 atrack.write(buffer, 0, buffersize);
+        		Message m = new Message();
+        		m.obj  = buffer;
+        		uiCallback.sendMessage(m);
             } catch (Exception e) {
                     e.printStackTrace();
                     started = false;
@@ -119,4 +136,11 @@ public class AudioBufferManager extends Thread{
 		started = false;
 		arecord.release();
 	}
+	private static Handler uiCallback = new Handler () {
+	    public void handleMessage (Message msg) {
+	    	byte[] b = (byte[]) msg.obj;
+	    	mCallBack.onBufferUpdate(b);
+	    }
+	};
+	
 }

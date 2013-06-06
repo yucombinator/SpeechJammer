@@ -4,17 +4,18 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.devspark.appmsg.AppMsg;
-import com.fima.chartview.LinearSeries;
-import com.fima.chartview.LinearSeries.LinearPoint;
 import com.icechen1.speechjammer.ConfigureFragment.HeadsetConnectionReceiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.media.AudioManager;
 import android.media.audiofx.Visualizer;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
@@ -24,17 +25,20 @@ import android.widget.TextView;
  * Copyright (C) 2013 Yu Chen Hou
  */
 public class MainActivity extends SherlockFragmentActivity {
-	AudioBufferManager audiosource;
 	static boolean started = false;
 	boolean mShowingBack = false;
 	Menu menu;
-	static int delay_time = 200;
+	static int delay_time;
+	public static int AudioSessionID = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		//TODO Toggle
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		delay_time= PreferenceManager.getDefaultSharedPreferences(this).getInt("delay_time", 150);
+
 		
         if (savedInstanceState == null) {
         	getSupportFragmentManager()
@@ -67,25 +71,24 @@ public class MainActivity extends SherlockFragmentActivity {
 	    switch (item.getItemId()) {
 	    case R.id.about:
 	        return true;
+	    case R.id.defaults:
+	    	SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+	    	final Editor editor = pref.edit();
+            editor.putInt("delay_time", 150);              
+            editor.commit();
+			AppMsg.makeText(this, getResources().getString (R.string.restart), AppMsg.STYLE_INFO).show();
+
+	    	return true;
 	    case R.id.toggle:
 	    	//Turn off or on
 			if(started){
-				flipCard();
-				audiosource.interrupt();
 				item.setTitle(getResources().getString (R.string.toggle_start));
 				started = false;
+				flipCard();
 				return true;
 			}else{
-				flipCard();
-				try{
-					audiosource = new AudioBufferManager(delay_time);
-					audiosource.start();
-				}catch(Exception e){
-					audiosource.interrupt();
-					audiosource = new AudioBufferManager(delay_time);
-					audiosource.start();
-				}
 				item.setTitle(getResources().getString (R.string.toggle_stop));
+				flipCard();
 				started = true;
 				return true;
 			}
@@ -96,34 +99,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onDestroy() {
 	    super.onDestroy();
-	    audiosource.interrupt();
-	}
-	public void updateChart(View view){
-	    Visualizer v = new Visualizer(0);
-	    v.setEnabled(true);
-	    byte[] waveform = new byte[v.getCaptureSize()];
-	    v.getWaveForm(waveform);
-	    int rate = v.getSamplingRate();
-	    
-		// Find the chart view
-		//ChartView chartView = (ChartView) findViewById(R.id.chart_view);
-
-		// Create the data points
-		LinearSeries series = new LinearSeries();
-		series.setLineColor(0xFF0099CC);
-		series.setLineWidth(2);
-		int i=0;
-		for (byte b: waveform) {
-			series.addPoint(new LinearPoint(i, (int)b));
-			Log.d("SpeechJammer", i +" "+ b);
-			i++;
-			
-		}
-
-		// Add chart view data
-		//chartView.addSeries(series);
-		//chartView.setLeftLabelAdapter(new ValueLabelAdapter(this, LabelOrientation.VERTICAL));
-		//chartView.setBottomLabelAdapter(new ValueLabelAdapter(this, LabelOrientation.HORIZONTAL));
 	}
 	
 	private void flipCard() {
@@ -149,12 +124,12 @@ public class MainActivity extends SherlockFragmentActivity {
 	            // the system Back button is pressed).
 	            .setCustomAnimations(
 	                    R.anim.animation_enter, R.anim.animation_leave,
-	                    R.anim.animation_enter, R.anim.animation_leave)
+	                    R.anim.animation_leave_2, R.anim.animation_enter_2)
 
 	            // Replace any fragments currently in the container view with a fragment
 	            // representing the next page (indicated by the just-incremented currentPage
 	            // variable).
-	            .replace(R.id.container, new VisualizationFragment())
+	            .replace(R.id.container, new RecordFragment())
 
 	            // Add this transaction to the back stack, allowing users to press Back
 	            // to get to the front of the card.

@@ -1,33 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:chartview="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
-    android:background="@drawable/background_card"
     android:orientation="vertical" >
-    
-        <com.fima.chartview.ChartView
-        android:id="@+id/chart_view"
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:paddingTop="8dp"
+    android:paddingLeft="8dp"
+    android:paddingBottom="5dp"
+    android:paddingRight="8dp"
+    android:background="@drawable/background_card"
+    android:orientation="vertical"
+    android:layout_weight="1" >
+        <TextView
+        android:id="@+id/titleEq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Wave"
+        style="@style/MedTitle" />
+     <TextView
+        android:id="@+id/lineEQ"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:gravity="center_horizontal"
+        android:paddingTop="5dip"
+        android:textStyle="bold" />
+        <com.icechen1.speechjammer.VisualizerView
+            android:id="@+id/eq_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+             />
+</LinearLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:paddingTop="5dp"
+    android:paddingLeft="8dp"
+    android:paddingBottom="8dp"
+    android:paddingRight="8dp"
+    android:background="@drawable/background_card"
+    android:orientation="vertical"
+    android:layout_weight="1" >
+    <TextView
+        android:id="@+id/titleFFT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FFT"
+        style="@style/MedTitle" />
+     <TextView
+        android:id="@+id/lineFFT"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:gravity="center_horizontal"
+        android:paddingTop="5dip"
+        android:textStyle="bold" />
+        <com.icechen1.speechjammer.VisualizerView
+        android:id="@+id/fft_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
-        chartview:bottomLabelHeight="0dp"
-        chartview:gridLineColor="#E5E5E5"
-        chartview:gridLineWidth="1dp"
-        chartview:gridLinesHorizontal="5"
-        chartview:gridLinesVertical="5"
-        chartview:leftLabelWidth="0dp" />
-
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/chart_view"
-            android:layout_marginRight="55dp"
-            android:text="Button"
-            android:onClick="updateChart" />
+        android:layout_margin="8dp"/>
+</LinearLayout>
 </LinearLayout>
