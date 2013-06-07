@@ -4,7 +4,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.devspark.appmsg.AppMsg;
-import com.icechen1.speechjammer.ConfigureFragment.HeadsetConnectionReceiver;
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,19 +25,32 @@ import android.widget.TextView;
  * SpeechJammer
  * Copyright (C) 2013 Yu Chen Hou
  */
-public class MainActivity extends SherlockFragmentActivity {
+public class MainActivity extends SherlockFragmentActivity implements HeadsetConnectionReceiver.onAction {
 	static boolean started = false;
 	boolean mShowingBack = false;
 	Menu menu;
 	static int delay_time;
 	public static int AudioSessionID = 0;
 	
+	HeadsetConnectionReceiver mHeadsetConnectionReceiver;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		//TODO Toggle
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		if(savedInstanceState!=null){
+			started = savedInstanceState.getBoolean("mShowingBack");
+			mShowingBack = savedInstanceState.getBoolean("started");
+			
+			if(started){
+				
+			}
+			if (mShowingBack){
+				
+			}
+		}
+	    
 		delay_time= PreferenceManager.getDefaultSharedPreferences(this).getInt("delay_time", 150);
 
 		
@@ -52,15 +66,25 @@ public class MainActivity extends SherlockFragmentActivity {
 			//Display a feedback warning
 			AppMsg.makeText(this, getResources().getString (R.string.no_headphone_message), AppMsg.STYLE_ALERT).show();
 		}
-		registerReceiver(new HeadsetConnectionReceiver(), 
-                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
-		
+	    // Look up the AdView as a resource and load a request.
+	    AdView adView = (AdView)this.findViewById(R.id.adView);
+	    AdRequest request = new AdRequest();
+	    request.addKeyword("fun");
+	    request.addKeyword("speech");
+	    request.addKeyword("Delayed Auditory Feedback");
+	    request.addKeyword("prank");
+	    request.addKeyword("sound");
+	    request.addKeyword("music");
+	    adView.loadAd(request);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getSupportMenuInflater().inflate(R.menu.menu, menu);
+		if(started){
+			menu.findItem(R.id.toggle).setTitle(getResources().getString (R.string.toggle_stop));
+		}
 		this.menu = menu;
 		return true;
 	}
@@ -83,6 +107,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	    	//Turn off or on
 			if(started){
 				item.setTitle(getResources().getString (R.string.toggle_start));
+				mHeadsetConnectionReceiver = new HeadsetConnectionReceiver(this);
+				registerReceiver(mHeadsetConnectionReceiver, 
+		                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 				started = false;
 				flipCard();
 				return true;
@@ -97,8 +124,22 @@ public class MainActivity extends SherlockFragmentActivity {
 	    }
 	}
 	@Override
-	protected void onDestroy() {
-	    super.onDestroy();
+	protected void onPause() {
+	    super.onPause();
+	    try{
+	    unregisterReceiver(mHeadsetConnectionReceiver);
+	    }catch(Exception e){
+	    	
+	    }
+	}
+	
+	@Override
+	protected void onResume() {
+	    super.onResume();
+	    if(started){
+		registerReceiver(mHeadsetConnectionReceiver, 
+                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+	    }
 	}
 	
 	private void flipCard() {
@@ -151,23 +192,25 @@ public class MainActivity extends SherlockFragmentActivity {
 		}
 	}
 	
-	public class HeadsetConnectionReceiver extends BroadcastReceiver {
-		public boolean headsetConnected = false;
-		 public void onReceive(Context context, Intent intent) {
-			  if (intent.hasExtra("state")){
-			   if (headsetConnected && intent.getIntExtra("state", 0) == 0){
-				   headsetConnected = false;
-				   if (MainActivity.started){
-					   MenuItem item = menu.findItem(R.id.toggle);
-					   onOptionsItemSelected(item);
-				   }
-			   }
-			   else if (!headsetConnected && intent.getIntExtra("state", 0) == 1){
-				   headsetConnected = true;
-			   }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+       savedInstanceState.putBoolean("mShowingBack", mShowingBack);
+       savedInstanceState.putBoolean("started", started);
+       super.onSaveInstanceState(savedInstanceState);
 
-			  }
-		 }
+     } 
+
+	@Override
+	public void onPlug() {
+		
+	}
+
+	@Override
+	public void onUnPlug() {
+		   if (MainActivity.started){
+			   MenuItem item = menu.findItem(R.id.toggle);
+			   onOptionsItemSelected(item);
+		   }
 	}
 
 }

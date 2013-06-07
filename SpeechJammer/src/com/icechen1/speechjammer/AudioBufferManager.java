@@ -13,6 +13,7 @@ import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.MediaRecorder.AudioSource;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,7 +22,7 @@ import android.util.Log;
 
 public class AudioBufferManager extends Thread{
 	public interface BufferCallBack {
-		public void onBufferUpdate(byte[] b);
+		public void onBufferUpdate(int[] b);
 	}
 	static String LOG_TAG = "SpeechJammer";
 	AudioRecord arecord;
@@ -31,7 +32,7 @@ public class AudioBufferManager extends Thread{
 	private boolean started = true;
 	private static BufferCallBack mCallBack;
 	double delay;
-	
+
 	public AudioBufferManager(int time, BufferCallBack callback) {
 		mCallBack = callback;
 		delay=time;
@@ -40,16 +41,22 @@ public class AudioBufferManager extends Thread{
 			//Find the best supported sample rate
 			for (int rate : new int[] {8000, 11025, 16000, 22050, 44100}) {  // add the rates you wish to check against
 				int bufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_DEFAULT , AudioFormat.ENCODING_PCM_16BIT);
-				if (bufferSize > 0) {
+				if (bufferSize != AudioRecord.ERROR_BAD_VALUE) {
 					// buffer size is valid, Sample rate supported
 					SAMPLE_RATE = rate;
 					buffersize = bufferSize;
 					Log.i(LOG_TAG,"Recording sample rate:" + SAMPLE_RATE + " with buffer size:"+ buffersize);
 				}
 			}
+
+			int _audioTrackSize = android.media.AudioTrack.getMinBufferSize(
+					SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
+					AudioFormat.ENCODING_PCM_16BIT);
+			Log.i(LOG_TAG,"Final sample rate:" + SAMPLE_RATE + " with buffer size:"+ buffersize);
+
 			Log.i(LOG_TAG,"Initializing Audio Record and Audio Playing objects");
 			Log.i(LOG_TAG,"Delay time is: " + delay + " ms");
-			
+
 			//Set up the recorder and the player
 			arecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
 					SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
@@ -57,7 +64,7 @@ public class AudioBufferManager extends Thread{
 
 			atrack = new AudioTrack(AudioManager.STREAM_MUSIC,
 					SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, buffersize * 1,
+					AudioFormat.ENCODING_PCM_16BIT, _audioTrackSize,
 					AudioTrack.MODE_STREAM);
 			MainActivity.AudioSessionID = atrack.getAudioSessionId();
 			atrack.getAudioSessionId();
@@ -67,10 +74,10 @@ public class AudioBufferManager extends Thread{
 		}
 	}
 
-    @Override
-    public void run() { 
-           android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-           //AudioRecord recorder = null;
+	@Override
+	public void run() { 
+		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+		//AudioRecord recorder = null;
 
 		//Create our buffers
         byte[] buffer  = new byte[buffersize];
@@ -95,10 +102,9 @@ public class AudioBufferManager extends Thread{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-        
 		arecord.startRecording();
         atrack.play();
-
+        int i = 0;
         // start recording and playing back
         while(started) {
         	try {
@@ -110,9 +116,12 @@ public class AudioBufferManager extends Thread{
         		circBuffer.getInputStream().read(buffer, 0, buffersize);
         		//Play the byte array content
                 atrack.write(buffer, 0, buffersize);
+                if(i%2 == 0){ //TODO This should be an option
         		Message m = new Message();
         		m.obj  = buffer;
         		uiCallback.sendMessage(m);
+                }
+                i++;
             } catch (Exception e) {
                     e.printStackTrace();
                     started = false;
@@ -139,26 +148,26 @@ public class AudioBufferManager extends Thread{
 	private static Handler uiCallback = new Handler () {
 	    public void handleMessage (Message msg) {
 	    	byte[] bytes = (byte[]) msg.obj;
-	    	byte[] toReturn = new byte[buffersize/2];
+	    	int[] samples = new int[bytes.length/2]; //bytes.length/2
 	    	//Convert bytes into samples
 	    	int sampleIndex = 0;
-
 	    	for (int t = 0; t < bytes.length;) {
 	    		int low = (int) bytes[t];
 	    		t++;
 	    		int high = (int) bytes[t];
 	    		t++;
 	    		int sample = getSixteenBitSample(high, low);
-	    		toReturn[sampleIndex] = (byte) sample;
+	    		samples[sampleIndex] = sample;
+	    		//Log.i("SpeechJammer", "Got " + samples[sampleIndex]);
+	    		//toReturn[sampleIndex] = (byte)low;
 	    		sampleIndex++;
 	    	}
 	    	
-	    	mCallBack.onBufferUpdate(toReturn);
+	    	mCallBack.onBufferUpdate(samples);
 	    }
 	};
 	
 	private static int getSixteenBitSample(int high, int low) {
 		return (high << 8) + (low & 0x00ff);
 	}
-	
 }

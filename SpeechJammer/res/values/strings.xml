@@ -14,6 +14,6 @@
     <string name="headphone_status2">Headphone not connected</string>
     <string name="set_delay">Adjust delay</string>
     <string name="reset_default">Reset to default</string>
-    <string name="delay_explained">Because of the Android\'s inherent audio latency, the actual audio delay will be higher than configured.</string>
+    <string name="delay_explained">Because of the Android\'s inherent audio latency, the actual audio delay will be higher than configured. A value of 150ms is recommended.</string>
 
 </resources>

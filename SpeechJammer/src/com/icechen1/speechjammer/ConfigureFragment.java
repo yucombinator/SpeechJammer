@@ -20,8 +20,9 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class ConfigureFragment extends Fragment {
+public class ConfigureFragment extends Fragment implements HeadsetConnectionReceiver.onAction {
 	TextView headphone_status;
+	HeadsetConnectionReceiver mHeadsetConnectionReceiver;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -34,7 +35,7 @@ public class ConfigureFragment extends Fragment {
 	    SeekBar mSeekbar = (SeekBar) v.findViewById(R.id.seekBar);
 	    mSeekbar.setProgress(200);
 	    final TextView seekTime = (TextView) v.findViewById(R.id.current_delay);
-	    seekTime.setText(pref.getInt("delay_time", 150)+" ms");
+	    seekTime.setText(MainActivity.delay_time+" ms");
 	    mSeekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
 	    {
 	       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
@@ -50,7 +51,8 @@ public class ConfigureFragment extends Fragment {
 	      public void onStopTrackingTouch(SeekBar seekBar) {}
 	    });
 		//Set up headphone unplugged failsafe
-		getActivity().registerReceiver(new HeadsetConnectionReceiver(), 
+	    mHeadsetConnectionReceiver = new HeadsetConnectionReceiver(this);
+		getActivity().registerReceiver(mHeadsetConnectionReceiver, 
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 	    headphone_status = (TextView) v.findViewById(R.id.headphone_status);
 	    
@@ -62,21 +64,31 @@ public class ConfigureFragment extends Fragment {
         return v;
     }
     
-	public class HeadsetConnectionReceiver extends BroadcastReceiver {
-		public boolean headsetConnected = false;
-		 public void onReceive(Context context, Intent intent) {
-			  if (intent.hasExtra("state")){
-			   if (headsetConnected && intent.getIntExtra("state", 0) == 0){
-				   headsetConnected = false;
-				   headphone_status.setText(getResources().getString (R.string.headphone_status2));
-			   }
-			   else if (!headsetConnected && intent.getIntExtra("state", 0) == 1){
-				   headsetConnected = true;
-				   headphone_status.setText(getResources().getString (R.string.headphone_status1));
-			   }
+    @Override
+    public void onDestroyView(){
+    	super.onDestroyView();
+    	getActivity().unregisterReceiver(mHeadsetConnectionReceiver);
+    }
+    
+    @Override
+    public void onStart(){
+    	super.onStart();
+		getActivity().registerReceiver(mHeadsetConnectionReceiver, 
+                new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
-			  }
-		 }
+    }
+
+	@Override
+	public void onPlug() {
+		headphone_status.setText(getResources().getString (R.string.headphone_status1));
 	}
+
+	@Override
+	public void onUnPlug() {
+
+		headphone_status.setText(getResources().getString (R.string.headphone_status2));
+	}
+    
+
 
 }

@@ -33,7 +33,7 @@ public class VisualizerView extends View {
 	private int mType;
 	private int mFftSamples = 48;
 
-	private byte[] mBytes = null;
+	private int[] mBytes = null;
 	private float[] mPoints;
 	private Rect mRect = new Rect();
 
@@ -62,7 +62,7 @@ public class VisualizerView extends View {
 		mForePaint.setColor(mColor);
 	}
 
-	public void updateVisualizer(byte[] bytes) {
+	public void updateVisualizer(int[] bytes) {
 		mBytes = bytes;
 		invalidate();
 	}
@@ -114,13 +114,13 @@ public class VisualizerView extends View {
 			for (int i = 0; i < mBytes.length - 1; i++) {
 				mPoints[i * 4] = mRect.width() * i / (mBytes.length - 1);
 				mPoints[i * 4 + 1] = mRect.height() / 2
-						+ ((byte) (mBytes[i] + 128)) * (mRect.height() / 2)
-						/ 128;
+						+ ( (mBytes[i] + 128)) * (mRect.height() / 2)
+						/ 128 /100;
 				mPoints[i * 4 + 2] = mRect.width() * (i + 1)
 						/ (mBytes.length - 1);
 				mPoints[i * 4 + 3] = mRect.height() / 2
-						+ ((byte) (mBytes[i + 1] + 128)) * (mRect.height() / 2)
-						/ 128;
+						+ ( (mBytes[i + 1] + 128)) * (mRect.height() / 2)
+						/ 128 /100;
 			}
 			canvas.drawLines(mPoints, mForePaint);
 			break;
