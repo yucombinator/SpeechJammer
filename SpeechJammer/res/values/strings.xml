@@ -9,6 +9,7 @@
     <string name="toggle_stop">Stop</string>
     <string name="about">About</string>
     <string name="restart">Please restart the app for changes to take effect.</string>
+    <string name="restart_1">Settings reset</string>
     <string name="headphone_status">Headphone status</string>
     <string name="headphone_status1">Headphone connected</string>
     <string name="headphone_status2">Headphone not connected</string>

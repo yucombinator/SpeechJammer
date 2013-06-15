@@ -1,5 +1,7 @@
 package com.icechen1.speechjammer;
 
+import org.codechimp.apprater.AppRater;
+
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -7,20 +9,14 @@ import com.devspark.appmsg.AppMsg;
 import com.google.ads.AdRequest;
 import com.google.ads.AdView;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.media.AudioManager;
-import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.View;
-import android.widget.SeekBar;
-import android.widget.TextView;
 /*
  * SpeechJammer
  * Copyright (C) 2013 Yu Chen Hou
@@ -38,7 +34,8 @@ public class MainActivity extends SherlockFragmentActivity implements HeadsetCon
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+		delay_time= PreferenceManager.getDefaultSharedPreferences(this).getInt("delay_time", 150);
+
 		if(savedInstanceState!=null){
 			started = savedInstanceState.getBoolean("mShowingBack");
 			mShowingBack = savedInstanceState.getBoolean("started");
@@ -50,14 +47,11 @@ public class MainActivity extends SherlockFragmentActivity implements HeadsetCon
 				
 			}
 		}
-	    
-		delay_time= PreferenceManager.getDefaultSharedPreferences(this).getInt("delay_time", 150);
-
 		
         if (savedInstanceState == null) {
         	getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.container, new ConfigureFragment())
+                    .add(R.id.container, new ConfigureFragment(),"frag_conf")
                     .commit();
         }
         
@@ -69,13 +63,8 @@ public class MainActivity extends SherlockFragmentActivity implements HeadsetCon
 	    // Look up the AdView as a resource and load a request.
 	    AdView adView = (AdView)this.findViewById(R.id.adView);
 	    AdRequest request = new AdRequest();
-	    request.addKeyword("fun");
-	    request.addKeyword("speech");
-	    request.addKeyword("Delayed Auditory Feedback");
-	    request.addKeyword("prank");
-	    request.addKeyword("sound");
-	    request.addKeyword("music");
 	    adView.loadAd(request);
+		AppRater.app_launched(this);
 	}
 
 	@Override
@@ -98,9 +87,18 @@ public class MainActivity extends SherlockFragmentActivity implements HeadsetCon
 	    case R.id.defaults:
 	    	SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 	    	final Editor editor = pref.edit();
+	    	delay_time = 150;
             editor.putInt("delay_time", 150);              
             editor.commit();
-			AppMsg.makeText(this, getResources().getString (R.string.restart), AppMsg.STYLE_INFO).show();
+            try{
+            	//Try to change the seekbar value
+            	ConfigureFragment fragment = (ConfigureFragment) getSupportFragmentManager().findFragmentByTag("frag_conf");
+                fragment.invalidateSeekBar(); 
+    			AppMsg.makeText(this, getResources().getString (R.string.restart_1), AppMsg.STYLE_INFO).show();
+            }catch(Exception e){
+    			AppMsg.makeText(this, getResources().getString (R.string.restart), AppMsg.STYLE_INFO).show();
+
+            }
 
 	    	return true;
 	    case R.id.toggle:

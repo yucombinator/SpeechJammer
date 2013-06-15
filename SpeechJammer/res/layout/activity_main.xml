@@ -33,7 +33,7 @@
       android:layout_gravity="center_horizontal"
       ads:adSize="BANNER"
       ads:adUnitId="a151b0f2c2248cd"
-      ads:loadAdOnCreate="true"
+      ads:loadAdOnCreate="false"
       ads:testDevices="TEST_EMULATOR, B25913BF3417BD09D4BA455AC53A9970" />
 
   </LinearLayout>

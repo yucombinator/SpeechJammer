@@ -23,6 +23,7 @@ import android.widget.TextView;
 public class ConfigureFragment extends Fragment implements HeadsetConnectionReceiver.onAction {
 	TextView headphone_status;
 	HeadsetConnectionReceiver mHeadsetConnectionReceiver;
+	SeekBar mSeekbar;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -32,8 +33,8 @@ public class ConfigureFragment extends Fragment implements HeadsetConnectionRece
     	
     	//LOAD VIEW
     	View v = inflater.inflate(R.layout.configure_fragment, container, false);
-	    SeekBar mSeekbar = (SeekBar) v.findViewById(R.id.seekBar);
-	    mSeekbar.setProgress(200);
+	    mSeekbar = (SeekBar) v.findViewById(R.id.seekBar);
+	    mSeekbar.setProgress(MainActivity.delay_time);
 	    final TextView seekTime = (TextView) v.findViewById(R.id.current_delay);
 	    seekTime.setText(MainActivity.delay_time+" ms");
 	    mSeekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
@@ -71,6 +72,15 @@ public class ConfigureFragment extends Fragment implements HeadsetConnectionRece
     }
     
     @Override
+    public void onResume(){
+    	super.onResume();
+    	try{
+    	invalidateSeekBar();
+    	}catch(Exception e){
+    		
+    	}
+    }
+    @Override
     public void onStart(){
     	super.onStart();
 		getActivity().registerReceiver(mHeadsetConnectionReceiver, 
@@ -87,6 +97,10 @@ public class ConfigureFragment extends Fragment implements HeadsetConnectionRece
 	public void onUnPlug() {
 
 		headphone_status.setText(getResources().getString (R.string.headphone_status2));
+	}
+	
+	public void invalidateSeekBar(){
+		mSeekbar.setProgress(MainActivity.delay_time);
 	}
     
 
